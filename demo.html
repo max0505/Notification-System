@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WINGIFY</title> 
+    <meta name="viewport" content="width=device-width, initial-scale=1"> 
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/notification.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+  <div style="text-align:center;"> 
+  <h1>DEMO</h1> 
+  </div>
+  <div class="dropdown" style="margin-left:500px;margin-top:30px;">
+      <div class="dropdown-toggle item" id="menu1" data-toggle="dropdown" style="margin-left:156px;">
+              <img src="img/43.Bell.png" class="bell-demo">
+              <span class="notify-badge-demo" id="Count1"></span>
+      </div>
+      <ul class="dropdown-menu" id="listings" role="menu" aria-labelledby="menu1">  
+      </ul>
+  </div>
+   
+  <script>
+    function countupdate() //function for updating count in the bell and notification data
+        {
+            $.ajax({
+                   type: "GET",
+                   url: "count.php",
+                   success: function(response)
+                            {
+                                //window.tmp = response.split("~~");
+                                window.tmp = JSON.parse(response);
+                                if(tmp["id_count"]!=0)
+                                    {
+                                        $('#Count1').empty();
+                                        $('#Count1').html(tmp["id_count"]);
+                                    } 
+                                else
+                                    {
+                                        $('#Count1').empty();
+                                    }
+                                $('#listings').empty()
+                                $('#listings').html(tmp["html"]);
+                            }
+                  });
+        }
+
+    setInterval(countupdate, 29000); // Auto-update of count every 29 seconds
+    
+    $(document).ready(countupdate());
+    
+    function decrement() //function for marking the notifications read
+        {
+            $.ajax({
+                   type: "GET",
+                   url: "decrement.php",
+                   data: "id="+tmp["ids"],
+                   success: function(response){
+                           countupdate()
+                           }
+           });
+        }
+        
+
+        var secondClick=0;
+        var iconClick=0;
+        
+       $(document).on('mousedown',function(evt){
+
+                if(iconClick && secondClick){
+                decrement();  //decreases the number of notifications read on closing of the dropdown
+                iconClick=0;
+                secondClick=0;
+                }
+              else if($(evt.target).parents('.dropdown-toggle').length){
+                iconClick =1;
+                if(secondClick==1) secondClick=0;
+                else 
+                secondClick=1;
+                }          
+        });
+        
+         
+        function increment() //function for creating new unread notifications
+        {
+            $.ajax({
+                  
+                   type: "GET",
+                   url: "increment.php",
+                   success: function(response){}                                       
+
+                  });
+        }
+
+        setInterval(increment,60000); //auto-generation of the new notifications in 60 seconds
+    
+
+  </script>
+
+</body>
+</html>
